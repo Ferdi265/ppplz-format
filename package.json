@@ -1,0 +1,28 @@
+{
+  "name": "ppplz-format",
+  "version": "1.0.0",
+  "description": "A module for formatting osu-ppplz output",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ferdi265/ppplz-format.git"
+  },
+  "keywords": [
+    "osu",
+    "pp",
+    "module",
+    "api"
+  ],
+  "author": "Ferdi265 <theferdi265@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Ferdi265/ppplz-format/issues"
+  },
+  "homepage": "https://github.com/Ferdi265/ppplz-format",
+  "dependencies": {
+    "colorful": ">=2.1"
+  }
+}
