@@ -61,7 +61,8 @@ module.exports = function (ppplz, options, cb) {
 		formatScore = function (score, line) {
 			var elements = [];
 			if (score.pb) {
-				elements.push(color('PP: ', 3) + color(score.pp.toFixed(2), 7));
+				elements.push(color('Raw PP: ', 3) + color(score.pp_raw.toFixed(2), 7));
+				if (score.pp_weighted) elements.push(color('Weighted PP: ', 3) + color(score.pp_weighted.toFixed(2), 7));
 			}
 			elements.push(color('Accuracy: ', 3) + color(score.accuracy.toFixed(2) + '%', 7));
 			if (elements.length > 0) {
@@ -70,16 +71,20 @@ module.exports = function (ppplz, options, cb) {
 		},
 		formatUser = function (user, line) {
 			var msg = '';
-			if (user.relative_pp < 0) {
-				msg += color('Lost PP: ', 1) + color((user.relative_pp * -1).toFixed(2) + ', ', 7);
-			} else {
-				msg += color('Gained PP: ', 2) + color(user.relative_pp.toFixed(2) + ', ', 7);
+			if (user.relative) {
+				if (user.relative_pp < 0) {
+					msg += color('Lost PP: ', 1) + color((user.relative_pp * -1).toFixed(2) + ', ', 7);
+				} else {
+					msg += color('Gained PP: ', 2) + color(user.relative_pp.toFixed(2) + ', ', 7);
+				}
 			}
 			msg += color('Total PP: ', 3) + color(user.pp.toFixed(2) + ', ', 7);
-			if (user.relative_rank < 0) {
-				msg += color('Relative Rank: ', 3) + color(user.relative_rank, 2) + color(', ', 7);
-			} else {
-				msg += color('Relative Rank: ', 3) + color('+' + user.relative_rank, 1) + color(', ', 7);
+			if (user.relative) {
+				if (user.relative_rank < 0) {
+					msg += color('Relative Rank: ', 3) + color(user.relative_rank, 2) + color(', ', 7);
+				} else {
+					msg += color('Relative Rank: ', 3) + color('+' + user.relative_rank, 1) + color(', ', 7);
+				}
 			}
 			msg += color('Rank: ', 3) + color(user.rank, 7);
 			line(time() + ' ' + msg);
@@ -90,11 +95,12 @@ module.exports = function (ppplz, options, cb) {
 		options = {};
 	}
 	return {
-		score: function (err, score) {
+		score: function (err, result) {
 			if (err) {
 				cb(time() + ' ' + color('' + err, 1));
 			} else {
-				formatRecent(score, cb);
+			formatUser(result.user, cb);
+			formatRecent(result.score, cb);
 			}
 		},
 		watch: function (err, result) {
