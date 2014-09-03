@@ -1,6 +1,6 @@
 {
   "name": "ppplz-format",
-  "version": "1.0.2",
+  "version": "1.4.1",
   "description": "A module for formatting osu-ppplz output",
   "main": "index.js",
   "scripts": {

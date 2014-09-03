@@ -9,8 +9,41 @@ module.exports = function (ppplz, options, cb) {
 			c.bgcolor = bg === undefined ? null : bg;
 			return '' + c;
 		},
-		beatmapName = function (beatmap) {
-			return color(beatmap.artist + ' - ' + beatmap.title, 3) + color(' [' + beatmap.version + ']', 1);
+		beatmapName = function (beatmap, score) {
+			var name = color(beatmap.artist + ' - ' + beatmap.title, 3) + color(' [' + beatmap.version + ']', 1),
+				selected = parseInt(score.enabled_mods),
+				modStr = '',
+				modStrPart;
+			if (selected & ppplz.Mods.Hidden || selected & ppplz.Mods.HardRock || selected & ppplz.Mods.DoubleTime || selected & ppplz.Mods.NightCore || selected & ppplz.Mods.SuddenDeath || selected & ppplz.Mods.Perfect || selected & ppplz.Mods.FlashLight || selected & ppplz.Mods.FadeIn) {
+				modStrPart = '+';
+				if (selected & ppplz.Mods.Hidden) modStrPart += 'HD';
+				if (selected & ppplz.Mods.HardRock) modStrPart += 'HR';
+				if (selected & ppplz.Mods.DoubleTime) modStrPart += 'DT';
+				if (selected & ppplz.Mods.NightCore) modStrPart += 'NC';
+				if (selected & ppplz.Mods.SuddenDeath) modStrPart += 'SD';
+				if (selected & ppplz.Mods.Perfect) modStrPart += 'PF';
+				if (selected & ppplz.Mods.FlashLight) modStrPart += 'FL';
+				if (selected & ppplz.Mods.FadeIn) modStrPart += 'FI';
+				modStr += color(modStrPart, 2);
+			}
+			if (selected & ppplz.Mods.Easy || selected & ppplz.Mods.NoFail || selected & ppplz.Mods.HalfTime || selected & ppplz.Mods.SpunOut || selected & ppplz.Mods.Key4 ||selected & ppplz.Mods.Key5 || selected & ppplz.Mods.Key6 || selected & ppplz.Mods.Key7 || selected & ppplz.Mods.Key8) {
+				modStrPart = '-';
+				if (selected & ppplz.Mods.Easy) modStrPart += 'EZ';
+				if (selected & ppplz.Mods.NoFail) modStrPart += 'NF';
+				if (selected & ppplz.Mods.HalfTime) modStrPart += 'HT';
+				if (selected & ppplz.Mods.SpunOut) modStrPart += 'SO';
+				if (selected & ppplz.Mods.Key4) modStrPart += 'K4';
+				if (selected & ppplz.Mods.Key5) modStrPart += 'K5';
+				if (selected & ppplz.Mods.Key6) modStrPart += 'K6';
+				if (selected & ppplz.Mods.Key7) modStrPart += 'K7';
+				if (selected & ppplz.Mods.Key8) modStrPart += 'K8';
+				modStr += color(modStrPart, 1);
+			}
+			name = name + modStr;
+			if (options.link) {
+				name = '[http://osu.ppy.sh/b/' + beatmap.beatmap_id + ' ' + name + ']';
+			}
+			return name;
 		},
 		colorRank = function (rank) {
 			switch (rank) {
@@ -32,29 +65,22 @@ module.exports = function (ppplz, options, cb) {
 					return color(rank, 7);
 			}
 		},
-		padleft = function (num, digits) {
-			return Array(digits -num.toFixed(0).length + 1).join('0') + String(num);
-		},
-		time = function () {
-			var now = new Date();
-			return color('[' + padleft(now.getHours(), 2) + ':' + padleft(now.getMinutes(), 2) + ']', 6);
-		},
 		formatRecent = function (score, line) {
 			osu.getBeatmap(score.beatmap_id, function (err, beatmap) {
 				var msg;
 				if (err) {
-					line(time() + ' ' + color('' + err, 1));
+					line(color('' + err, 1));
 					return;
 				}
 				if (score.rank === 'F') {
-					msg = color('Failed ', 1) + beatmapName(beatmap);
+					msg = color('Failed ', 1) + beatmapName(beatmap, score);
 				} else {
-					msg = color('Achieved rank ', 7) + colorRank(score.rank) + color(' on ', 7) + beatmapName(beatmap);
+					msg = color('Achieved rank ', 7) + colorRank(score.rank) + color(' on ', 7) + beatmapName(beatmap, score);
 				}
 				if (score.pb) {
 					msg = color('New PB! ', 2) + msg;
 				}
-				line(time() + ' ' + msg);
+				line(msg);
 				formatScore(score, line);
 			});
 		},
@@ -66,7 +92,7 @@ module.exports = function (ppplz, options, cb) {
 			}
 			elements.push(color('Accuracy: ', 3) + color(score.accuracy.toFixed(2) + '%', 7));
 			if (elements.length > 0) {
-				line.call(undefined, time() + ' ' + elements.join(', '));
+				line.call(undefined, elements.join(', '));
 			}
 		},
 		formatUser = function (user, line) {
@@ -87,27 +113,17 @@ module.exports = function (ppplz, options, cb) {
 				}
 			}
 			msg += color('Rank: ', 3) + color(user.rank, 7);
-			line(time() + ' ' + msg);
+			line(msg);
 		},
 		osu = ppplz.osu;
 	if (cb === undefined) {
 		cb = options;
 		options = {};
 	}
-	return {
-		score: function (err, result) {
-			if (err) {
-				cb(time() + ' ' + color('' + err, 1));
-			} else {
-			formatUser(result.user, cb);
-			formatRecent(result.score, cb);
-			}
-		},
-		watch: function (err, result) {
-			if (err) {
-				cb(time() + ' ' + color(err + '', 1));
-				return;
-			}
+	return function (err, result) {
+		if (err) {
+			cb(color('' + err, 1));
+		} else if (result.score.rank !== 'F' || options.fails) {
 			formatUser(result.user, cb);
 			formatRecent(result.score, cb);
 		}
