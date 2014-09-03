@@ -18,10 +18,16 @@ module.exports = function (ppplz, options, cb) {
 				modStrPart = '+';
 				if (selected & ppplz.Mods.Hidden) modStrPart += 'HD';
 				if (selected & ppplz.Mods.HardRock) modStrPart += 'HR';
-				if (selected & ppplz.Mods.DoubleTime) modStrPart += 'DT';
-				if (selected & ppplz.Mods.NightCore) modStrPart += 'NC';
-				if (selected & ppplz.Mods.SuddenDeath) modStrPart += 'SD';
-				if (selected & ppplz.Mods.Perfect) modStrPart += 'PF';
+				if (selected & ppplz.Mods.NightCore) {
+					modStrPart += 'NC';
+				} else if (selected & ppplz.Mods.DoubleTime) {
+					modStrPart += 'DT';
+				}
+				if (selected & ppplz.Mods.Perfect) {
+					modStrPart += 'PF';
+				} else if (selected & ppplz.Mods.SuddenDeath) {
+					modStrPart += 'SD';
+				}
 				if (selected & ppplz.Mods.FlashLight) modStrPart += 'FL';
 				if (selected & ppplz.Mods.FadeIn) modStrPart += 'FI';
 				modStr += color(modStrPart, 2);
