@@ -71,8 +71,26 @@ module.exports = function (ppplz, options, cb) {
 					return color(rank, 7);
 			}
 		},
+		retry = function (amount, fn, thisArg) {
+			var args = Array.prototype.slice.call(arguments, 3),
+				counter = 0;
+			return function (cb) {
+				args.push(function (err, res) {
+					if (err) {
+						if (++counter >= amount) {
+							cb(err, res);
+						} else {
+							fn.apply(thisArg, args);
+						}
+					} else {
+						cb(err, res);
+					}
+				});
+				fn.apply(thisArg, args);
+			};
+		},
 		formatRecent = function (score, line) {
-			osu.getBeatmap(score.beatmap_id, function (err, beatmap) {
+			retry(3, osu.getBeatmap, osu, score.beatmap_id)(function (err, beatmap) {
 				var msg;
 				if (err) {
 					line(color('' + err, 1));
@@ -121,6 +139,9 @@ module.exports = function (ppplz, options, cb) {
 			msg += color('Rank: ', 3) + color(user.rank, 7);
 			line(msg);
 		},
+		select = function (score) {
+			return (score.rank !== 'F' || options.filter === 'tries') && (options.filter !== 'pbs' || score.pb);
+		},
 		osu = ppplz.osu;
 	if (cb === undefined) {
 		cb = options;
@@ -129,7 +150,7 @@ module.exports = function (ppplz, options, cb) {
 	return function (err, result) {
 		if (err) {
 			cb(color('' + err, 1));
-		} else if (result.score.rank !== 'F' || options.fails) {
+		} else if (select(result.score)) {
 			formatUser(result.user, cb);
 			formatRecent(result.score, cb);
 		}
