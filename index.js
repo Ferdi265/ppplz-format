@@ -140,7 +140,7 @@ module.exports = function (ppplz, options, cb) {
 			line(msg);
 		},
 		select = function (score) {
-			return (score.rank !== 'F' || options.filter === 'tries') && (options.filter !== 'pbs' || score.pb);
+			return score && (score.rank !== 'F' || options.filter === 'tries') && (options.filter !== 'pbs' || score.pb);
 		},
 		osu = ppplz.osu;
 	if (cb === undefined) {
@@ -150,9 +150,11 @@ module.exports = function (ppplz, options, cb) {
 	return function (err, result) {
 		if (err) {
 			cb(color('' + err, 1));
-		} else if (select(result.score)) {
+		} else if (result && select(result.score)) {
 			formatUser(result.user, cb);
 			formatRecent(result.score, cb);
+		} else if (result) {
+			cb(color('You don\'t have any recent scores.', 7));
 		}
 	};
 };
