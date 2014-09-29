@@ -153,7 +153,7 @@ module.exports = function (ppplz, options, cb) {
 		} else if (result && select(result.score)) {
 			formatUser(result.user, cb);
 			formatRecent(result.score, cb);
-		} else if (result) {
+		} else if (!result) {
 			cb(color('You don\'t have any recent scores.', 7));
 		}
 	};
