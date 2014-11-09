@@ -116,7 +116,7 @@ module.exports = function (ppplz, options, cb) {
 			}
 			elements.push(color('Accuracy: ', 3) + color(score.accuracy.toFixed(2) + '%', 7));
 			if (elements.length > 0) {
-				line.call(undefined, elements.join(', '));
+				line(elements.join(', '));
 			}
 		},
 		formatUser = function (user, line) {
